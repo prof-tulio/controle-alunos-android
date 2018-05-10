@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Alunos</string>
+    <string name="label_nome">Nome:</string>
+    <string name="label_ok">OK</string>
+    <string name="msg_saudacao">Olá, %s</string>
+
+</resources>
