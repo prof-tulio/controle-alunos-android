@@ -23,18 +23,14 @@
         <activity android:name=".ListActivity" />
         <activity android:name=".CadastroActivity" />
         <activity android:name=".LoginActivity">
-
-        </activity>
-
-        <activity android:name=".ListSmsActivity" />
-
-        <activity android:name=".ContadorActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity android:name=".ListSmsActivity" />
 
         <receiver android:name=".receiver.SmsReceiver">
             <intent-filter>
@@ -51,12 +47,6 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
-
-        <service
-            android:name=".service.ContadorService"
-            android:enabled="true"
-            android:exported="true" />
-
 
     </application>
 
