@@ -5,9 +5,12 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.ContextMenu;
@@ -18,6 +21,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import java.io.File;
 import java.util.List;
 
 import tuliocota.com.br.primeiroapp.adapter.AlunosAdapter;
@@ -68,6 +72,10 @@ public class ListActivity extends AppCompatActivity {
                 finish();
                 Intent intent = new Intent(this, LoginActivity.class);
                 startActivity(intent);
+                break;
+            case R.id.menu_sms:
+                Intent intentListarSms = new Intent(this, ListSmsActivity.class);
+                startActivity(intentListarSms);
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -148,7 +156,30 @@ public class ListActivity extends AppCompatActivity {
                 }
             });
 
+            MenuItem menuTirarFoto = menu.add("Tirar foto");
+            menuTirarFoto.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem menuItem) {
+
+                    Intent intentFoto = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+                    File file = getArquivoImagem();
+                    Uri fotoUri = FileProvider.getUriForFile(ListActivity.this,
+                            "tuliocota.com.br.fileprovider", file);
+                    intentFoto.putExtra(MediaStore.EXTRA_OUTPUT, fotoUri);
+
+                    startActivity(intentFoto);
+
+                    return false;
+                }
+            });
         }
+    }
+
+    private File getArquivoImagem() {
+        File diretorioStorage = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File imageFile = new File(diretorioStorage, "foto_" + aluno.getId() + ".jpg");
+        return imageFile;
     }
 
     @Override

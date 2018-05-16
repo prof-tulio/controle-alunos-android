@@ -3,6 +3,11 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
+        android:id="@+id/menu_sms"
+        android:icon="@android:drawable/ic_dialog_email"
+        android:title="Item"
+        app:showAsAction="always" />
+    <item
         android:id="@+id/menu_sair"
         android:title="Sair"
         app:showAsAction="always" />

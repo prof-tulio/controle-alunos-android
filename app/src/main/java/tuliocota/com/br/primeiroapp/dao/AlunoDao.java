@@ -7,10 +7,13 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.support.annotation.NonNull;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 import tuliocota.com.br.primeiroapp.entidade.Aluno;
+import tuliocota.com.br.primeiroapp.entidade.MensagemSms;
 
 /**
  * Created by tulio on 09/03/2018.
@@ -19,7 +22,17 @@ import tuliocota.com.br.primeiroapp.entidade.Aluno;
 public class AlunoDao extends SQLiteOpenHelper {
 
     public AlunoDao(Context context) {
-        super(context, "db_alunos", null, 1);
+
+        super(context, "db_alunos", null, 2);
+    }
+
+    private String getSqlTableSMS(){
+        return "CREATE TABLE sms(" +
+                "id INTEGER PRIMARY KEY, " +
+                "aluno_id INTEGER, " +
+                "data DATETIME, " +
+                "conteudo TEXT, " +
+                "FOREIGN KEY (aluno_id) REFERENCES alunos(id));";
     }
 
     @Override
@@ -33,14 +46,16 @@ public class AlunoDao extends SQLiteOpenHelper {
                 "email TEXT, " +
                 "nota REAL, " +
                 "faltas INTEGER );";
+        sql += getSqlTableSMS();
         db.execSQL(sql);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        String sql = "DROP TABLE IF EXISTS alunos";
-        db.execSQL(sql);
-        onCreate(db);
+        if (oldVersion == 1 && newVersion == 2){
+            String sql = getSqlTableSMS();
+            db.execSQL(sql);
+        }
     }
 
     public void salvar(Aluno aluno) {
@@ -112,4 +127,40 @@ public class AlunoDao extends SQLiteOpenHelper {
         }
         return null;
     }
+
+    private SimpleDateFormat formatadorData = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+    public void salvarSms(MensagemSms mensagemSms){
+        SQLiteDatabase db = getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("aluno_id", mensagemSms.getAluno().getId());
+        values.put("data", formatadorData.format(mensagemSms.getData()));
+        values.put("conteudo", mensagemSms.getMensagem());
+        db.insert("sms", null, values);
+        db.close();
+    }
+
+    public List<MensagemSms> listarUltimosSms(){
+        SQLiteDatabase db = getReadableDatabase();
+        String sql = "SELECT * FROM  sms s " +
+                "INNER JOIN alunos a ON (a.id = s.aluno_id) " +
+                "ORDER BY s.data DESC LIMIT 10";
+        Cursor cursor = db.rawQuery(sql, null);
+
+        List<MensagemSms> msgs = new ArrayList<>();
+        while (cursor.moveToNext()){
+            MensagemSms msg = new MensagemSms();
+            try {
+                msg.setData(formatadorData.parse(cursor.getString(cursor.getColumnIndex("data"))));
+                msg.setMensagem(cursor.getString(cursor.getColumnIndex("conteudo")));
+                msg.setAluno(getAluno(cursor));
+                msgs.add(msg);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
+        return msgs;
+    }
+
+
 }
