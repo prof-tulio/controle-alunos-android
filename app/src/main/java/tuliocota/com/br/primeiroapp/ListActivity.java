@@ -13,6 +13,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -20,13 +21,21 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.io.File;
 import java.util.List;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 import tuliocota.com.br.primeiroapp.adapter.AlunosAdapter;
 import tuliocota.com.br.primeiroapp.dao.AlunoDao;
 import tuliocota.com.br.primeiroapp.entidade.Aluno;
+import tuliocota.com.br.primeiroapp.service.AlunoService;
+import tuliocota.com.br.primeiroapp.service.dto.AlunosResponse;
 
 public class ListActivity extends AppCompatActivity {
 
@@ -84,7 +93,7 @@ public class ListActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        carregarLista();
+        carregarListaRest();
     }
 
     private void carregarLista() {
@@ -96,6 +105,36 @@ public class ListActivity extends AppCompatActivity {
 //                this, android.R.layout.simple_list_item_1, alunos);
         AlunosAdapter adapter = new AlunosAdapter(this, alunos);
         listView.setAdapter(adapter);
+    }
+
+    private void carregarListaRest(){
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(AlunoService.URL_BASE)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build().;
+        AlunoService alunoService = retrofit.create(AlunoService.class);
+        Call<AlunosResponse> request = alunoService.listarAlunos();
+        request.enqueue(new Callback<AlunosResponse>() {
+            @Override
+            public void onResponse(Call<AlunosResponse> call, Response<AlunosResponse> response) {
+                if (response.isSuccessful()){
+                    AlunosResponse resp = response.body();
+                    alunos = resp.getAlunos();
+                    AlunosAdapter adapter = new AlunosAdapter(ListActivity.this, alunos);
+                    listView.setAdapter(adapter);
+                } else if (response.code() == 400){
+                    Toast.makeText(ListActivity.this, "Erro Cliente", Toast.LENGTH_SHORT).show();
+                } else if (response.code() == 500) {
+                    Toast.makeText(ListActivity.this, "Erro Servidor", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<AlunosResponse> call, Throwable t) {
+                Log.e("service", "Erro: " + t.getMessage());
+            }
+        });
+
     }
 
     private Aluno aluno;

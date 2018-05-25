@@ -3,6 +3,7 @@ package tuliocota.com.br.primeiroapp;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.support.design.widget.TextInputEditText;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -10,9 +11,15 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 import tuliocota.com.br.primeiroapp.dao.AlunoDao;
 import tuliocota.com.br.primeiroapp.databinding.ActivityCadastroBinding;
 import tuliocota.com.br.primeiroapp.entidade.Aluno;
+import tuliocota.com.br.primeiroapp.service.AlunoService;
 
 public class CadastroActivity extends AppCompatActivity {
 
@@ -60,6 +67,44 @@ public class CadastroActivity extends AppCompatActivity {
                         aluno.getNome()), Toast.LENGTH_LONG)
                 .show();
         finish();
+    }
+
+    public void salvarRest() {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(AlunoService.URL_BASE)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        AlunoService alunoService = retrofit.create(AlunoService.class);
+
+        Call<Void> request = null;
+
+        if (aluno.getId() == null){
+            request = alunoService.salvarAluno(aluno);
+        } else {
+            request = alunoService.atualizarAluno(aluno.getId(), aluno);
+        }
+        request.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()){
+                    AlertDialog.Builder builder = new AlertDialog.Builder(CadastroActivity.this);
+                    builder.setMessage("Aluno salvo com sucesso")
+                            .setPositiveButton("OK", null)
+                            .show();
+                } else {
+                    //Alert que deu ruim
+                }
+                finish();
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                //Alert
+                finish();
+            }
+        });
+
     }
 
     public Aluno getAluno() {
