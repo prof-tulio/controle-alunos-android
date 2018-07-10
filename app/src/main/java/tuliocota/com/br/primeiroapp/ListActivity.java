@@ -111,7 +111,7 @@ public class ListActivity extends AppCompatActivity {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(AlunoService.URL_BASE)
                 .addConverterFactory(GsonConverterFactory.create())
-                .build().;
+                .build();
         AlunoService alunoService = retrofit.create(AlunoService.class);
         Call<AlunosResponse> request = alunoService.listarAlunos();
         request.enqueue(new Callback<AlunosResponse>() {
@@ -134,6 +134,7 @@ public class ListActivity extends AppCompatActivity {
                 Log.e("service", "Erro: " + t.getMessage());
             }
         });
+
 
     }
 

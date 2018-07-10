@@ -11,6 +11,8 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+
 import org.w3c.dom.Text;
 
 import java.io.File;
@@ -62,9 +64,11 @@ public class AlunosAdapter extends BaseAdapter {
         txtNome.setText(aluno.getNome());
         txtTelefone.setText(aluno.getEndereco());
 
-        File imgFile = getArquivoImagem(aluno.getId().toString());
-        Bitmap bitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
-        imageView.setImageBitmap(bitmap);
+        Glide.with(context).load(aluno.getFoto()).into(imageView);
+
+//        File imgFile = getArquivoImagem(aluno.getId().toString());
+//        Bitmap bitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
+//        imageView.setImageBitmap(bitmap);
 
         return view;
     }
